@@ -96,4 +96,22 @@ public class BookManagerControllerTests
             new Book() { Id = 3, Title = "Book Three", Description = "This is the description for Book Three", Author = "Person Three", Genre = Genre.Thriller },
         };
     }
+    [Test]
+    public void DeleteBookById_Updates_Correct_Book()
+    {
+        //Arrange
+        long existingBookId = 3;
+        Book existingBookFound = GetTestBooks()
+            .FirstOrDefault(b => b.Id.Equals(existingBookId));
+
+        //var bookForDelete = new Book() { Id = 3, Title = "Book Three", Description = "I am updating this for Book Three", Author = "Person Three", Genre = Genre.Education };
+
+        _mockBookManagementService.Setup(b => b.FindBookById(existingBookId)).Returns(existingBookFound);
+
+        //Act
+        var result = _controller.DeleteBookById(existingBookId);//, bookForDelete);
+
+        //Assert
+        result.Should().BeOfType(typeof(NoContentResult));
+    }
 }
