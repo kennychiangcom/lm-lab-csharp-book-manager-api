@@ -20,22 +20,36 @@ namespace BookManagerApi.Services
 
         public Book Create(Book book)
         {
-            _context.Add(book);
-            _context.SaveChanges();
-            return book;
+            var existingBookFound = FindBookById(book.Id);
+            if (existingBookFound == null)
+            {
+                _context.Add(book);
+                _context.SaveChanges();
+                return book;
+            }
+            else
+            {
+                return existingBookFound;
+            }
         }
 
         public Book Update(long id, Book book)
         {
             var existingBookFound = FindBookById(id);
+            if (existingBookFound != null)
+            {
+                existingBookFound.Title = book.Title;
+                existingBookFound.Description = book.Description;
+                existingBookFound.Author = book.Author;
+                existingBookFound.Genre = book.Genre;
 
-            existingBookFound.Title = book.Title;
-            existingBookFound.Description = book.Description;
-            existingBookFound.Author = book.Author;
-            existingBookFound.Genre = book.Genre;
-
-            _context.SaveChanges();
-            return book;
+                _context.SaveChanges();
+                return book;
+            }
+            else
+            {
+                return null;
+            }
         }
 
         public Book FindBookById(long id)
@@ -52,9 +66,13 @@ namespace BookManagerApi.Services
         public bool DeleteBook(long id)
         {
             var existingBookFound = FindBookById(id);
-            _context.Remove(existingBookFound);
-            _context.SaveChanges();
-            return FindBookById(id) == null;
+            if (existingBookFound != null)
+            {
+                _context.Remove(existingBookFound);
+                _context.SaveChanges();
+                return FindBookById(id) == null;
+            }
+            return false;
         }
 
     }

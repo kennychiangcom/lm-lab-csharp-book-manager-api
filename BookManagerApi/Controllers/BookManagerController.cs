@@ -19,7 +19,9 @@ namespace BookManagerApi.Controllers
         [HttpGet]
         public ActionResult<IEnumerable<Book>> GetBooks()
         {
-            return _bookManagementService.GetAllBooks();
+            var books = _bookManagementService.GetAllBooks();
+            if (books.Count > 0) return books;
+            return NotFound(new {Id = 1, error = "No books exist in the database yet."});
         }
 
         // GET: api/v1/book/5
@@ -27,7 +29,8 @@ namespace BookManagerApi.Controllers
         public ActionResult<Book> GetBookById(long id)
         {
             var book = _bookManagementService.FindBookById(id);
-            return book;
+            if (book != null) return book;
+            return NotFound(new {Id = 2, error = $"Book id {id} does not exist."});
         }
 
         // PUT: api/v1/book/5
@@ -35,8 +38,9 @@ namespace BookManagerApi.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateBookById(long id, Book book)
         {
-            _bookManagementService.Update(id, book);
-            return NoContent();
+            var updatedBook = _bookManagementService.Update(id, book);
+            if(updatedBook != null) return NoContent();
+            return NotFound(new {Id = 3, error = $"Book id {id} does not exist and no update has been performed."});
         }
 
         // POST: api/v1/book
@@ -44,16 +48,17 @@ namespace BookManagerApi.Controllers
         [HttpPost]
         public ActionResult<Book> AddBook(Book book)
         {
-            _bookManagementService.Create(book);
-            return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
+            if (_bookManagementService.Create(book) == book) return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
+            return NotFound(new { Id = 4, error = $"Book id {book.Id} already exists and no overlapping of book id is possible." });
         }
 
-        // ?:
+        // DELETE: api/v1/book/5
         [HttpDelete("{id}")]
         public IActionResult DeleteBookById(long id)
         {
-            _bookManagementService.DeleteBook(id);
-            return NoContent();
+            bool bookDeleted = _bookManagementService.DeleteBook(id);
+            if (bookDeleted) return NoContent();
+            return NotFound(new { Id = 5, error = $"Book id {id} does not exist and no deletion has been made." });
         }
     }
 }

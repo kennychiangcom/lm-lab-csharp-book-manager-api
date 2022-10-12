@@ -69,7 +69,7 @@ public class BookManagerControllerTests
         var result = _controller.UpdateBookById(existingBookId, bookUpdates);
 
         //Assert
-        result.Should().BeOfType(typeof(NoContentResult));
+        result.Should().BeOfType(typeof(NotFoundObjectResult));
     }
 
     [Test]
@@ -97,14 +97,12 @@ public class BookManagerControllerTests
         };
     }
     [Test]
-    public void DeleteBookById_Updates_Correct_Book()
+    public void DeleteBookById_Deletes_Correct_Book()
     {
         //Arrange
         long existingBookId = 3;
         Book existingBookFound = GetTestBooks()
             .FirstOrDefault(b => b.Id.Equals(existingBookId));
-
-        //var bookForDelete = new Book() { Id = 3, Title = "Book Three", Description = "I am updating this for Book Three", Author = "Person Three", Genre = Genre.Education };
 
         _mockBookManagementService.Setup(b => b.FindBookById(existingBookId)).Returns(existingBookFound);
 
@@ -112,6 +110,6 @@ public class BookManagerControllerTests
         var result = _controller.DeleteBookById(existingBookId);//, bookForDelete);
 
         //Assert
-        result.Should().BeOfType(typeof(NoContentResult));
+        result.Should().BeOfType(typeof(NotFoundObjectResult));
     }
 }
