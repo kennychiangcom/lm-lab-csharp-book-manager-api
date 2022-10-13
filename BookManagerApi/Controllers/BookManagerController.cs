@@ -10,6 +10,20 @@ namespace BookManagerApi.Controllers
     {
         private readonly IBookManagementService _bookManagementService;
 
+        private object ExceptionResponse(long errCode, long? bookId)
+        {
+            return new { ID = errCode, error = errCode switch 
+                {
+                    1 => "No books exist in the database yet.",
+                    2 => $"Book id {bookId} does not exist.",
+                    3 => $"Book id {bookId} does not exist and no update has been performed.",
+                    4 => $"Book id {bookId} already exists and no overlapping of book id is possible.",
+                    5 => $"Book id {bookId} does not exist and no deletion has been made.",
+                    _ => ""
+                }
+            };
+        }
+
         public BookManagerController(IBookManagementService bookManagementService)
         {
             _bookManagementService = bookManagementService;
@@ -20,8 +34,7 @@ namespace BookManagerApi.Controllers
         public ActionResult<IEnumerable<Book>> GetBooks()
         {
             var books = _bookManagementService.GetAllBooks();
-            if (books.Count > 0) return books;
-            return NotFound(new {Id = 1, error = "No books exist in the database yet."});
+            return books.Count > 0 ? books : NotFound(ExceptionResponse(1, null));
         }
 
         // GET: api/v1/book/5
@@ -29,8 +42,7 @@ namespace BookManagerApi.Controllers
         public ActionResult<Book> GetBookById(long id)
         {
             var book = _bookManagementService.FindBookById(id);
-            if (book != null) return book;
-            return NotFound(new {Id = 2, error = $"Book id {id} does not exist."});
+            return book != null ? book : NotFound(ExceptionResponse(2, id));
         }
 
         // PUT: api/v1/book/5
@@ -38,9 +50,7 @@ namespace BookManagerApi.Controllers
         [HttpPut("{id}")]
         public IActionResult UpdateBookById(long id, Book book)
         {
-            var updatedBook = _bookManagementService.Update(id, book);
-            if(updatedBook != null) return NoContent();
-            return NotFound(new {Id = 3, error = $"Book id {id} does not exist and no update has been performed."});
+            return _bookManagementService.Update(id, book) != null ? NoContent() : NotFound(ExceptionResponse(3, id));
         }
 
         // POST: api/v1/book
@@ -48,17 +58,14 @@ namespace BookManagerApi.Controllers
         [HttpPost]
         public ActionResult<Book> AddBook(Book book)
         {
-            if (_bookManagementService.Create(book) == book) return CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book);
-            return NotFound(new { Id = 4, error = $"Book id {book.Id} already exists and no overlapping of book id is possible." });
+            return _bookManagementService.Create(book) == book ? CreatedAtAction(nameof(GetBookById), new { id = book.Id }, book) : NotFound(ExceptionResponse(4, book.Id));
         }
 
         // DELETE: api/v1/book/5
         [HttpDelete("{id}")]
         public IActionResult DeleteBookById(long id)
         {
-            bool bookDeleted = _bookManagementService.DeleteBook(id);
-            if (bookDeleted) return NoContent();
-            return NotFound(new { Id = 5, error = $"Book id {id} does not exist and no deletion has been made." });
+            return _bookManagementService.DeleteBook(id) ? NoContent() : NotFound(ExceptionResponse(5, id));
         }
     }
 }
