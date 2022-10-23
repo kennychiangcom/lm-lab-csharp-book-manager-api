@@ -89,3 +89,10 @@ All of the HTTP handling methods were reviewed and exception handlings were adde
 
 `HttpDelete("{id}")` - Delete book by id: If the book id specified for deletion doesn't exist, an error id 5 and a message indicating the id of the non-existence book will be produced to the API client for the peace of mind.
 * The method DeleteBook() under BookManagementServices.cs has already been catered to properly return results for the identification of exceptions.
+
+## Completed Assignment - API Lab 2 - Connecting to Real Databases. 
+
+In this repo:
+- Connected to local MySQL database: installed MySQL locally and established connection via localhost
+- Created different appsettings.json files: which could contain different settings like database connection strings
+- Created different launch profiles
